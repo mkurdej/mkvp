@@ -109,9 +109,7 @@ To unit_cast(From v) {
 mk::DHT dht(DHTPIN, mk::DHT::Type::Dht11);
 
 void setup() {
-  // Begin serial communication at a baud rate of 9600:
   Serial.begin(9600);
-  // Setup sensor:
   dht.begin();
 }
 
@@ -126,17 +124,13 @@ void loop() {
   auto hum = dht.read_humidity();
   // Read the temperature as Celsius:
   auto tempC = dht.read_temperature_celsius();
-  // Read the temperature as Fahrenheit:
-  auto tempF = dht.read_temperature_fahrenheit();
+
   // Check if any reads failed and exit early (to try again):
-  if (isnan(hum) || isnan(tempC.count()) || isnan(tempF.count())) {
+  if (isnan(hum) || isnan(tempC.count())) {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
 
-  // Compute heat index in Fahrenheit (default):
-  auto hif = dht.compute_heat_index(tempF, hum);
-  // Compute heat index in Celsius:
   auto hic = dht.compute_heat_index(tempC, hum);
 
   Serial.print("Humidity: ");
@@ -147,23 +141,11 @@ void loop() {
   Serial.print(tempC.count());
   Serial.print(" \xC2\xB0");
   Serial.print("C | ");
-  Serial.print(tempF.count());
-  Serial.print(" \xC2\xB0");
-  Serial.print("F ");
 
   Serial.print("Heat index: ");
   Serial.print(hic.count());
   Serial.print(" \xC2\xB0");
-  Serial.print("C | ");
-  Serial.print(hif.count());
-  Serial.print(" \xC2\xB0");
-  Serial.print("F");
+  Serial.print("C");
 
-  auto hicf = mk::unit_cast<mk::degrees_fahrenheit>(hic);
-  Serial.print(" (");
-  Serial.print(hicf.count());
-  Serial.print(" \xC2\xB0");
-  Serial.print("F");
-  Serial.print(")");
   Serial.println("");
 }
