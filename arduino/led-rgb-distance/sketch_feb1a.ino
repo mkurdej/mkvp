@@ -1,5 +1,20 @@
-#include <chrono.h>
-// #include <algorithm> // TODO: no wchar.h on Arduino
+#include <ArduinoLibcxx.h>
+#include <chrono>
+#include <cmath>
+
+// #include <bitset> // TODO: This constructor has not been ported to this
+// platform
+// #include <ccomplex> // TODO: C99
+// #include <cfenv> // TODO: C99
+// #include <complex.h> // TODO: C99
+// #include <condition_variable> // TODO: __string
+// #include <ctgmath> // TODO: C99
+// #include <fenv.h> // TODO: C99
+// #include <random> // TODO: __string
+// #include <string>
+// #include <string_view>
+// #include <system_error> // TODO: __string
+// #include <tgmath.h> // TODO: C99
 
 namespace chr = std::chrono;
 using namespace std::literals;
@@ -10,16 +25,6 @@ constexpr uint8_t blue_light_pin = 9;
 
 constexpr uint8_t trigger_pin = 7;
 constexpr uint8_t echo_pin = 6;
-
-template <typename T>
-constexpr T clamp(const T &v, const T &lo, const T &hi) {
-  return (v < lo) ? lo : (hi < v) ? hi : v;
-}
-
-template <typename T>
-constexpr T abs(const T &v) {
-  return (v < T(0)) ? -v : v;
-}
 
 namespace mk {
 
@@ -49,7 +54,7 @@ rgb_color HSVtoRGB(hsv_color hsv) {
   float s = hsv.s / 100.0;
   float v = hsv.v / 100.0;
   float C = s * v;
-  float X = C * (1 - abs(fmod(hsv.h / 60.0, 2) - 1));
+  float X = C * (1 - std::abs(std::fmod(hsv.h / 60.0, 2) - 1));
   float m = v - C;
 
   float r, g, b;
