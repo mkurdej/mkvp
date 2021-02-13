@@ -16,33 +16,46 @@
 
 namespace mk {
 
+template <typename Temp>
+static const char *temperature_unit;
+
 template <typename Rep, typename PreDifferenceToCelsius = std::ratio<0>,
           typename RatioToCelsius = std::ratio<1>,
           typename PostDifferenceToCelsius = std::ratio<0>>
-struct temperature {
+struct temperature : Printable {
   using representation = Rep;
   using ratio = RatioToCelsius;
   using pre_difference = PreDifferenceToCelsius;
   using post_difference = PostDifferenceToCelsius;
 
-  explicit temperature(Rep cnt) : _count{cnt} {}
+  explicit temperature(Rep cnt) : _value{cnt} {}
 
   Rep count() {
-    return _count;
+    return _value;
+  }
+
+  virtual size_t printTo(Print &p) const {
+    p.print(_value);
+    p.print(temperature_unit<temperature>);
   }
 
 private:
-  Rep _count;
+  Rep _value;
 };
 
 // 0-100%
-struct humidity {
+struct humidity : Printable {
   using representation = float;
 
   explicit humidity(representation v) : _value{v} {}
 
   representation count() {
     return _value;
+  }
+
+  virtual size_t printTo(Print &p) const {
+    p.print(_value);
+    p.print("%");
   }
 
 private:
@@ -52,6 +65,14 @@ private:
 using degrees_celsius = temperature<float>;
 using degrees_fahrenheit =
     temperature<float, std::ratio<0>, std::ratio<18, 10>, std::ratio<32>>;
+
+template <>
+inline const char *temperature_unit<degrees_celsius> = "\xC2\xB0"
+                                                       "C";
+
+template <>
+inline const char *temperature_unit<degrees_fahrenheit> = "\xC2\xB0"
+                                                          "F";
 
 using Pin = uint8_t;
 
@@ -148,19 +169,14 @@ void loop() {
 
   auto hic = dht.compute_heat_index(tempC, hum);
 
-  Serial.print("Humidity: ");
-  Serial.print(hum.count());
-  Serial.print(" % ");
+  Serial.print(" Humidity: ");
+  Serial.print(hum);
 
-  Serial.print("Temperature: ");
-  Serial.print(tempC.count());
-  Serial.print(" \xC2\xB0");
-  Serial.print("C | ");
+  Serial.print(" Temperature: ");
+  Serial.print(tempC);
 
-  Serial.print("Heat index: ");
-  Serial.print(hic.count());
-  Serial.print(" \xC2\xB0");
-  Serial.print("C");
+  Serial.print(" Heat index: ");
+  Serial.print(hic);
 
   Serial.println("");
 }
