@@ -35,6 +35,20 @@ private:
   Rep _count;
 };
 
+// 0-100%
+struct humidity {
+  using representation = float;
+
+  explicit humidity(representation v) : _value{v} {}
+
+  representation count() {
+    return _value;
+  }
+
+private:
+  representation _value;
+};
+
 using degrees_celsius = temperature<float>;
 using degrees_fahrenheit =
     temperature<float, std::ratio<0>, std::ratio<18, 10>, std::ratio<32>>;
@@ -57,8 +71,8 @@ struct DHT {
     return _dht.begin();
   }
 
-  float read_humidity() {
-    return _dht.readHumidity();
+  humidity read_humidity() {
+    return humidity{_dht.readHumidity()};
   }
 
   degrees_celsius read_temperature_celsius() {
@@ -69,12 +83,13 @@ struct DHT {
     return degrees_fahrenheit{_dht.readTemperature(true)};
   }
 
-  degrees_celsius compute_heat_index(degrees_celsius t, float humidity) {
-    return degrees_celsius{_dht.computeHeatIndex(t.count(), humidity, false)};
+  degrees_celsius compute_heat_index(degrees_celsius t, humidity hum) {
+    return degrees_celsius{
+        _dht.computeHeatIndex(t.count(), hum.count(), false)};
   }
 
-  degrees_fahrenheit compute_heat_index(degrees_fahrenheit t, float humidity) {
-    return degrees_fahrenheit{_dht.computeHeatIndex(t.count(), humidity)};
+  degrees_fahrenheit compute_heat_index(degrees_fahrenheit t, humidity hum) {
+    return degrees_fahrenheit{_dht.computeHeatIndex(t.count(), hum.count())};
   }
 
 private:
@@ -126,7 +141,7 @@ void loop() {
   auto tempC = dht.read_temperature_celsius();
 
   // Check if any reads failed and exit early (to try again):
-  if (isnan(hum) || isnan(tempC.count())) {
+  if (isnan(hum.count()) || isnan(tempC.count())) {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
@@ -134,7 +149,7 @@ void loop() {
   auto hic = dht.compute_heat_index(tempC, hum);
 
   Serial.print("Humidity: ");
-  Serial.print(hum);
+  Serial.print(hum.count());
   Serial.print(" % ");
 
   Serial.print("Temperature: ");
